@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using IdentityDemo.Data;
 using IdentityDemo.Models;
 using IdentityDemo.Services;
+using IdentityDemo.Configuration;
 
 namespace IdentityDemo
 {
@@ -43,9 +44,20 @@ namespace IdentityDemo
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddScoped<UsersConfig>();
+
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 1;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+            });
 
             services.AddMvc();
 
@@ -55,7 +67,8 @@ namespace IdentityDemo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
+            UsersConfig usersConfig)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -83,6 +96,8 @@ namespace IdentityDemo
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            usersConfig.SeedAsync();
         }
     }
 }
