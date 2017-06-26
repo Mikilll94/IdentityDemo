@@ -16,10 +16,14 @@ namespace IdentityDemo.Controllers
 
         public IActionResult Index()
         {
-            var usersViewModel = new IndexViewModel
+            var users =_dbContext.Users.OrderBy(u => u.FirstName).ToList();
+            var usersViewModel = users.Select( u => new IndexViewModel()
             {
-                Users = _dbContext.Users.OrderBy(u => u.FirstName).ToList()
-            };
+                Login = u.UserName,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email
+            });
             return View(usersViewModel);
         }
     }

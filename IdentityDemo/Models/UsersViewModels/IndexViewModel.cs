@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-
-namespace IdentityDemo.Models.UsersViewModels
+﻿namespace IdentityDemo.Models.UsersViewModels
 {
     public class IndexViewModel
     {
-        public IEnumerable<ApplicationUser> Users { get; set; }
+        public string Login { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
     }
 }

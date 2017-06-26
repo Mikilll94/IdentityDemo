@@ -1,4 +1,4 @@
-﻿@model IdentityDemo.Models.UsersViewModels.IndexViewModel
+﻿@model IEnumerable<IdentityDemo.Models.UsersViewModels.IndexViewModel>
 
 <h2>Users</h2>
 
@@ -13,11 +13,11 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model.Users)
+        @foreach (var user in Model)
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => user.UserName)
+                    @Html.DisplayFor(modelItem => user.Login)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => user.FirstName)
