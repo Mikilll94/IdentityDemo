@@ -17,7 +17,7 @@ namespace IdentityDemo.Controllers
         public IActionResult Index()
         {
             var users =_dbContext.Users.OrderBy(u => u.FirstName).ToList();
-            var usersViewModel = users.Select( u => new IndexViewModel()
+            var usersViewModel = users.Select( u => new UserViewModel()
             {
                 Login = u.UserName,
                 FirstName = u.FirstName,

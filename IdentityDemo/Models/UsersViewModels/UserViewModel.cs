@@ -1,6 +1,6 @@
 ﻿namespace IdentityDemo.Models.UsersViewModels
 {
-    public class IndexViewModel
+    public class UserViewModel
     {
         public string Login { get; set; }
         public string FirstName { get; set; }
