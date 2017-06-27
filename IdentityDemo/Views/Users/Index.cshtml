@@ -1,4 +1,7 @@
-﻿@model IEnumerable<IdentityDemo.Models.UsersViewModels.UserViewModel>
+﻿@using Microsoft.AspNetCore.Identity;
+@inject UserManager<ApplicationUser> userManager
+
+@model IEnumerable<IdentityDemo.Models.UsersViewModels.UserViewModel>
 
 <h2>Users</h2>
 
@@ -9,6 +12,7 @@
             <th>First Name</th>
             <th>Last Name</th>
             <th>Email address</th>
+            <th>Roles</th>
             <th></th>
         </tr>
     </thead>
@@ -27,6 +31,13 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => user.Email)
+                </td>
+                <td>
+                    @{
+                        var currentUser = await userManager.FindByNameAsync(user.Login);
+                        string roles = string.Join(", ", await userManager.GetRolesAsync(currentUser));
+                    }
+                    @Html.DisplayFor(modelItem => roles)
                 </td>
                 <td>
                     <a>Change role</a> |

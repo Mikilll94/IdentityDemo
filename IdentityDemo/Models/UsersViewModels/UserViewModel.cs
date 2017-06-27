@@ -1,4 +1,6 @@
-﻿namespace IdentityDemo.Models.UsersViewModels
+﻿using System.Collections.Generic;
+
+namespace IdentityDemo.Models.UsersViewModels
 {
     public class UserViewModel
     {
