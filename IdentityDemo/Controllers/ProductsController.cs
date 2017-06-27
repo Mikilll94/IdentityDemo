@@ -1,31 +1,35 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using IdentityDemo.Data;
 using IdentityDemo.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace IdentityDemo.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private UserManager<ApplicationUser> _userManager;
 
-        public ProductsController(ApplicationDbContext context)
+        public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
-            _context = context;    
+            _context = context;
+            _userManager = userManager;
         }
 
         // GET: Products
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Product.ToListAsync());
         }
 
         // GET: Products/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -58,6 +62,8 @@ namespace IdentityDemo.Controllers
         {
             if (ModelState.IsValid)
             {
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                product.Seller = user.FirstName + " " + user.LastName;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
