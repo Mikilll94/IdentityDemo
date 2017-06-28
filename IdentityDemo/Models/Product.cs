@@ -14,7 +14,6 @@ namespace IdentityDemo.Models
         [Display(Name = "Product name")]
         public string Name { get; set; }
 
-        [Required]
         [Display(Name = "Photo")]
         public string ImageName { get; set; }
 

@@ -1,11 +1,16 @@
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using IdentityDemo.Data;
 using IdentityDemo.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.DotNet.PlatformAbstractions;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IdentityDemo.Controllers
 {
@@ -14,11 +19,14 @@ namespace IdentityDemo.Controllers
     {
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
+        private IHostingEnvironment _hostingEnvironment;
 
-        public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
+            IHostingEnvironment hostingEnvironment)
         {
             _context = context;
             _userManager = userManager;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET: Products
@@ -58,12 +66,24 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,Name,ImageName,Price,Description")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductID,Name,ImageName,Price,Description")] Product product,
+            IFormFile file)
         {
+
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
                 product.Seller = user.FirstName + " " + user.LastName;
+
+                var filePath = _hostingEnvironment.ContentRootPath +
+                    "\\wwwroot\\images\\" + file.FileName;
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                product.ImageName = "images/" + file.FileName;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");

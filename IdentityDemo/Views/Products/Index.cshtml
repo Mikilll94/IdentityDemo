@@ -4,6 +4,8 @@
     ViewData["Title"] = "Index";
 }
 
+<link rel="stylesheet" href="~/css/products.css" />
+
 <h2>Index</h2>
 
 <p>
@@ -37,7 +39,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ImageName)
+                <img src="@item.ImageName" class="productImage"/>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Price)
