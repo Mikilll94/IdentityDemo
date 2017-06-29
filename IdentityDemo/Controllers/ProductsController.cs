@@ -83,7 +83,7 @@ namespace IdentityDemo.Controllers
                     await file.CopyToAsync(stream);
                 }
 
-                product.ImageName = "images/" + file.FileName;
+                product.ImageName = "~/images/" + file.FileName;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
