@@ -4,6 +4,8 @@
     ViewData["Title"] = "Details";
 }
 
+<link rel="stylesheet" href="~/css/products.css" />
+
 <h2>Details</h2>
 
 <div>
@@ -20,7 +22,7 @@
             @Html.DisplayNameFor(model => model.ImageName)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.ImageName)
+            <img src="@Url.Content(Model.ImageName)" class="productImage" />
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Price)

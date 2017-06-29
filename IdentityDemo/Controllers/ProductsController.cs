@@ -115,20 +115,37 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,ImageName,Price,Description")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,Price,Description")] Product product,
+            IFormFile file)
         {
             if (id != product.ProductID)
             {
                 return NotFound();
             }
 
+            if (file == null || file.Length == 0)
+            {
+                ModelState.AddModelError("ImageName", "Zdjêcie jest wymagane");
+            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var filePath = _hostingEnvironment.ContentRootPath +
+                        "\\wwwroot\\images\\" + file.FileName;
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    product.ImageName = "~/images/" + file.FileName;
+
                     _context.Update(product);
+
                     var user = await _userManager.GetUserAsync(HttpContext.User);
                     product.Seller = user.FullName;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
