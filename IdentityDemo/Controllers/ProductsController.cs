@@ -73,7 +73,7 @@ namespace IdentityDemo.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
-                product.Seller = user.FirstName + " " + user.LastName;
+                product.Seller = user.FullName;
 
                 var filePath = _hostingEnvironment.ContentRootPath +
                     "\\wwwroot\\images\\" + file.FileName;
@@ -124,6 +124,8 @@ namespace IdentityDemo.Controllers
                 try
                 {
                     _context.Update(product);
+                    var user = await _userManager.GetUserAsync(HttpContext.User);
+                    product.Seller = user.FullName;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
