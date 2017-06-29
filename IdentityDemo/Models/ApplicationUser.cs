@@ -10,7 +10,7 @@ namespace IdentityDemo.Models
 
         public string FullName
         {
-            get { return FirstName + " " + LastName; }
+            get { return $"{FirstName} {LastName}"; }
         }
 
     }
