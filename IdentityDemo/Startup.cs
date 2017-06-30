@@ -13,6 +13,8 @@ using IdentityDemo.Data;
 using IdentityDemo.Models;
 using IdentityDemo.Services;
 using IdentityDemo.Configuration;
+using Microsoft.AspNetCore.Authorization;
+using IdentityDemo.Authorization;
 
 namespace IdentityDemo
 {
@@ -64,6 +66,10 @@ namespace IdentityDemo
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+
+            // Authorization handlers.
+            services.AddScoped<IAuthorizationHandler,
+                                  ProductIsOwnerAuthorizationHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

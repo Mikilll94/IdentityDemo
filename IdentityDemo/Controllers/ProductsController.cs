@@ -1,3 +1,4 @@
+using IdentityDemo.Authorization;
 using IdentityDemo.Data;
 using IdentityDemo.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -20,13 +21,15 @@ namespace IdentityDemo.Controllers
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
         private IHostingEnvironment _hostingEnvironment;
+        private IAuthorizationService _authorizationService;
 
         public ProductsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager,
-            IHostingEnvironment hostingEnvironment)
+            IHostingEnvironment hostingEnvironment, IAuthorizationService authorizationService)
         {
             _context = context;
             _userManager = userManager;
             _hostingEnvironment = hostingEnvironment;
+            _authorizationService = authorizationService;
         }
 
         // GET: Products
@@ -75,8 +78,15 @@ namespace IdentityDemo.Controllers
             }
             if (ModelState.IsValid)
             {
-                var user = await _userManager.GetUserAsync(HttpContext.User);
-                product.Seller = user.FullName;
+                product.SellerID = _userManager.GetUserId(User);
+
+                var isAuthorized = await _authorizationService.AuthorizeAsync(
+                                                User, product, ProductOperations.Update);
+
+                if (!isAuthorized)
+                {
+                    return new ChallengeResult();
+                }
 
                 var filePath = _hostingEnvironment.ContentRootPath +
                     "\\wwwroot\\images\\" + file.FileName;
@@ -107,6 +117,15 @@ namespace IdentityDemo.Controllers
             {
                 return NotFound();
             }
+
+            var isAuthorized = await _authorizationService.AuthorizeAsync(
+                                                User, product, ProductOperations.Update);
+
+            if (!isAuthorized)
+            {
+                return new ChallengeResult();
+            }
+
             return View(product);
         }
 
@@ -131,6 +150,15 @@ namespace IdentityDemo.Controllers
             {
                 try
                 {
+                    product.SellerID = _userManager.GetUserId(User);
+
+                    var isAuthorized = await _authorizationService.AuthorizeAsync(
+                                User, product, ProductOperations.Update);
+                    if (!isAuthorized)
+                    {
+                        return new ChallengeResult();
+                    }
+
                     var filePath = _hostingEnvironment.ContentRootPath +
                         "\\wwwroot\\images\\" + file.FileName;
 
@@ -142,9 +170,6 @@ namespace IdentityDemo.Controllers
                     product.ImageName = "~/images/" + file.FileName;
 
                     _context.Update(product);
-
-                    var user = await _userManager.GetUserAsync(HttpContext.User);
-                    product.Seller = user.FullName;
 
                     await _context.SaveChangesAsync();
                 }
@@ -179,6 +204,13 @@ namespace IdentityDemo.Controllers
                 return NotFound();
             }
 
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, product,
+                                ProductOperations.Delete);
+            if (!isAuthorized)
+            {
+                return new ChallengeResult();
+            }
+
             return View(product);
         }
 
@@ -188,6 +220,14 @@ namespace IdentityDemo.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var product = await _context.Product.SingleOrDefaultAsync(m => m.ProductID == id);
+
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, product,
+                                ProductOperations.Delete);
+            if (!isAuthorized)
+            {
+                return new ChallengeResult();
+            }
+
             _context.Product.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");

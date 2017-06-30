@@ -23,6 +23,6 @@ namespace IdentityDemo.Models
 
         public string Description { get; set; }
 
-        public string Seller { get; set; }
+        public string SellerID { get; set; }
     }
 }

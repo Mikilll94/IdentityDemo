@@ -1,4 +1,5 @@
 @model IEnumerable<IdentityDemo.Models.Product>
+@using IdentityDemo.Authorization;
 
 @{
     ViewData["Title"] = "Index";
@@ -27,7 +28,7 @@
                     @Html.DisplayNameFor(model => model.Description)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.Seller)
+                    @Html.DisplayNameFor(model => model.SellerID)
                 </th>
             <th></th>
         </tr>
@@ -48,12 +49,21 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Seller)
+                @Html.DisplayFor(modelItem => item.SellerID)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ProductID">Edit</a> |
+                @if (await AuthorizationService.AuthorizeAsync(User,
+                                           item, ProductOperations.Update))
+                {
+                    <a asp-action="Edit" asp-route-id="@item.ProductID">Edit</a><text> | </text>
+                }
                 <a asp-action="Details" asp-route-id="@item.ProductID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProductID">Delete</a>
+                @if (await AuthorizationService.AuthorizeAsync(User,
+                                             item, ProductOperations.Delete))
+                {
+                    <text> | </text>
+                    <a asp-action="Delete" asp-route-id="@item.ProductID">Delete</a>
+                }
             </td>
         </tr>
 }
