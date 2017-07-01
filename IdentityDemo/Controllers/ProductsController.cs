@@ -69,7 +69,7 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,Name,Price,Description")] Product product,
+        public async Task<IActionResult> Create([Bind("Name,Price,Description")] Product product,
             IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -81,7 +81,7 @@ namespace IdentityDemo.Controllers
                 product.SellerID = _userManager.GetUserId(User);
 
                 var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                                User, product, ProductOperations.Update);
+                                                User, product, ProductOperations.Create);
 
                 if (!isAuthorized)
                 {
@@ -134,14 +134,9 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,Price,Description")] Product product,
+        public async Task<IActionResult> Edit(int id, [Bind("ProductID, Name,Price,Description")] Product product,
             IFormFile file)
         {
-            if (id != product.ProductID)
-            {
-                return NotFound();
-            }
-
             if (file == null || file.Length == 0)
             {
                 ModelState.AddModelError("ImageName", "Zdjêcie jest wymagane");
@@ -150,10 +145,14 @@ namespace IdentityDemo.Controllers
             {
                 try
                 {
-                    product.SellerID = _userManager.GetUserId(User);
+                    var productDb = _context.Product.SingleOrDefault(p => p.ProductID == id);
+                    if (productDb == null)
+                    {
+                        return NotFound();
+                    }
 
                     var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                User, product, ProductOperations.Update);
+                                User, productDb, ProductOperations.Update);
                     if (!isAuthorized)
                     {
                         return new ChallengeResult();
@@ -167,22 +166,19 @@ namespace IdentityDemo.Controllers
                         await file.CopyToAsync(stream);
                     }
 
-                    product.ImageName = "~/images/" + file.FileName;
+                    productDb.Name = product.Name;
+                    productDb.ImageName = "~/images/" + file.FileName;
+                    productDb.Price = product.Price;
+                    productDb.Description = product.Description;
+                    productDb.SellerID = _userManager.GetUserId(User);
 
-                    _context.Update(product);
+                    _context.Update(productDb);
 
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction("Index");
             }
