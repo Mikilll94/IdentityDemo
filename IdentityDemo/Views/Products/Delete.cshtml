@@ -1,4 +1,4 @@
-@model IdentityDemo.Models.Product
+@model Product
 
 @{
     ViewData["Title"] = "Delete";
@@ -24,7 +24,7 @@
             @Html.DisplayNameFor(model => model.ImageName)
         </dt>
         <dd>
-            <img src="@Url.Content(Model.ImageName)" class="productImage" />
+            <img src="@Url.Content("~/images/" + Model.ImageName)" class="productImage" />
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Price)

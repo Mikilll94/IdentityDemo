@@ -128,7 +128,7 @@ namespace IdentityDemo.Controllers
                 Description = product.Description
             };
 
-            return View(product);
+            return View(productViewModel);
         }
 
         // POST: Products/Edit/5
@@ -136,14 +136,8 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,
-            [Bind("ProductID, Name,Price,Description")] ProductViewModel productViewModel,
-            IFormFile file)
+        public async Task<IActionResult> Edit(int id, ProductViewModel productViewModel)
         {
-            if (file == null || file.Length == 0)
-            {
-                ModelState.AddModelError("ImagePath", "Zdjêcie jest wymagane");
-            }
             if (ModelState.IsValid)
             {
                 try
@@ -161,18 +155,18 @@ namespace IdentityDemo.Controllers
                         return new ChallengeResult();
                     }
 
-                    var filePath = _hostingEnvironment.ContentRootPath +
-                        "\\wwwroot\\images\\" + file.FileName;
+                    string filePath = Path.Combine(_hostingEnvironment.WebRootPath,
+                        "images", productViewModel.Image.FileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        await file.CopyToAsync(stream);
+                        await productViewModel.Image.CopyToAsync(stream);
                     }
 
-                    product.Name = product.Name;
-                    product.ImageName = "~/images/" + file.FileName;
-                    product.Price = product.Price;
-                    product.Description = product.Description;
+                    product.Name = productViewModel.Name;
+                    product.ImageName = productViewModel.Image.FileName;
+                    product.Price = productViewModel.Price;
+                    product.Description = productViewModel.Description;
                     product.SellerID = _userManager.GetUserId(User);
 
                     _context.Update(product);
@@ -203,7 +197,7 @@ namespace IdentityDemo.Controllers
                 return NotFound();
             }
 
-            var isAuthorized = await _authorizationService.AuthorizeAsync(User, product,
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, product.SellerID,
                                 ProductOperations.Delete);
             if (!isAuthorized)
             {
@@ -220,7 +214,7 @@ namespace IdentityDemo.Controllers
         {
             var product = await _context.Product.SingleOrDefaultAsync(m => m.ProductID == id);
 
-            var isAuthorized = await _authorizationService.AuthorizeAsync(User, product,
+            var isAuthorized = await _authorizationService.AuthorizeAsync(User, product.SellerID,
                                 ProductOperations.Delete);
             if (!isAuthorized)
             {
