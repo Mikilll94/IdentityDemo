@@ -40,7 +40,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <img src="@Url.Content(item.ImageName)" class="productImage"/>
+                <img src="@Url.Content("~/images/" + item.ImageName)" class="productImage"/>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Price)
@@ -53,13 +53,13 @@
             </td>
             <td>
                 @if (await AuthorizationService.AuthorizeAsync(User,
-                                           item, ProductOperations.Update))
+                                           item.SellerID, ProductOperations.Update))
                 {
                     <a asp-action="Edit" asp-route-id="@item.ProductID">Edit</a><text> | </text>
                 }
                 <a asp-action="Details" asp-route-id="@item.ProductID">Details</a> |
                 @if (await AuthorizationService.AuthorizeAsync(User,
-                                             item, ProductOperations.Delete))
+                                             item.SellerID, ProductOperations.Delete))
                 {
                     <text> | </text>
                     <a asp-action="Delete" asp-route-id="@item.ProductID">Delete</a>

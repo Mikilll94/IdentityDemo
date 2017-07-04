@@ -1,13 +1,12 @@
 using IdentityDemo.Authorization;
 using IdentityDemo.Data;
 using IdentityDemo.Models;
+using IdentityDemo.Models.ProductsViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.DotNet.PlatformAbstractions;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using System.Linq;
@@ -69,39 +68,35 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Price,Description")] Product product,
-            IFormFile file)
+        public async Task<IActionResult> Create(ProductViewModel productViewModel)
         {
-            if (file == null || file.Length == 0)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError("ImageName", "Zdjêcie jest wymagane");
+                return View(productViewModel);
             }
-            if (ModelState.IsValid)
+
+            IFormFile imageFile = productViewModel.Image;
+            var product = new Product()
             {
-                product.SellerID = _userManager.GetUserId(User);
+                Name = productViewModel.Name,
+                ImageName = imageFile.FileName,
+                Price = productViewModel.Price,
+                Description = productViewModel.Description,
+                SellerID = _userManager.GetUserId(User)
+            };
 
-                var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                                User, product, ProductOperations.Create);
-
-                if (!isAuthorized)
-                {
-                    return new ChallengeResult();
-                }
-
-                var filePath = _hostingEnvironment.ContentRootPath +
-                    "\\wwwroot\\images\\" + file.FileName;
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                product.ImageName = "~/images/" + file.FileName;
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+            string filePath = Path.Combine(_hostingEnvironment.WebRootPath, 
+                "images", productViewModel.Image.FileName);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
             }
-            return View(product);
+
+            _context.Add(product);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+
         }
 
         // GET: Products/Edit/5
@@ -119,12 +114,19 @@ namespace IdentityDemo.Controllers
             }
 
             var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                                User, product, ProductOperations.Update);
+                                                User, product.SellerID, ProductOperations.Update);
 
             if (!isAuthorized)
             {
                 return new ChallengeResult();
             }
+
+            var productViewModel = new ProductViewModel()
+            {
+                Name = product.Name,
+                Price = product.Price,
+                Description = product.Description
+            };
 
             return View(product);
         }
@@ -134,25 +136,26 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductID, Name,Price,Description")] Product product,
+        public async Task<IActionResult> Edit(int id,
+            [Bind("ProductID, Name,Price,Description")] ProductViewModel productViewModel,
             IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
-                ModelState.AddModelError("ImageName", "Zdjêcie jest wymagane");
+                ModelState.AddModelError("ImagePath", "Zdjêcie jest wymagane");
             }
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var productDb = _context.Product.SingleOrDefault(p => p.ProductID == id);
-                    if (productDb == null)
+                    var product = _context.Product.SingleOrDefault(p => p.ProductID == id);
+                    if (product == null)
                     {
                         return NotFound();
                     }
 
                     var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                User, productDb, ProductOperations.Update);
+                                User, product.SellerID, ProductOperations.Update);
                     if (!isAuthorized)
                     {
                         return new ChallengeResult();
@@ -166,13 +169,13 @@ namespace IdentityDemo.Controllers
                         await file.CopyToAsync(stream);
                     }
 
-                    productDb.Name = product.Name;
-                    productDb.ImageName = "~/images/" + file.FileName;
-                    productDb.Price = product.Price;
-                    productDb.Description = product.Description;
-                    productDb.SellerID = _userManager.GetUserId(User);
+                    product.Name = product.Name;
+                    product.ImageName = "~/images/" + file.FileName;
+                    product.Price = product.Price;
+                    product.Description = product.Description;
+                    product.SellerID = _userManager.GetUserId(User);
 
-                    _context.Update(productDb);
+                    _context.Update(product);
 
                     await _context.SaveChangesAsync();
                 }
@@ -182,7 +185,7 @@ namespace IdentityDemo.Controllers
                 }
                 return RedirectToAction("Index");
             }
-            return View(product);
+            return View(productViewModel);
         }
 
         // GET: Products/Delete/5

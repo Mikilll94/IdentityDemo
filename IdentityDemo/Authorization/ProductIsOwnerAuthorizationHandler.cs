@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace IdentityDemo.Authorization
 {
     public class ProductIsOwnerAuthorizationHandler
-                : AuthorizationHandler<OperationAuthorizationRequirement, Product>
+                : AuthorizationHandler<OperationAuthorizationRequirement, string>
     {
         UserManager<ApplicationUser> _userManager;
 
@@ -20,24 +20,20 @@ namespace IdentityDemo.Authorization
         protected override Task
             HandleRequirementAsync(AuthorizationHandlerContext context,
                                    OperationAuthorizationRequirement requirement,
-                                   Product resource)
+                                   string resource_sellerID)
         {
-            if (context.User == null || resource == null)
+            if (resource_sellerID == null)
             {
                 return Task.FromResult(0);
             }
 
-            // If we're not asking for CRUD permission, return.
-
-            if (requirement.Name != Constants.CreateOperationName &&
-                requirement.Name != Constants.ReadOperationName &&
-                requirement.Name != Constants.UpdateOperationName &&
+            if (requirement.Name != Constants.UpdateOperationName &&
                 requirement.Name != Constants.DeleteOperationName)
             {
                 return Task.FromResult(0);
             }
 
-            if (resource.SellerID == _userManager.GetUserId(context.User))
+            if (resource_sellerID == _userManager.GetUserId(context.User))
             {
                 context.Succeed(requirement);
             }
