@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IdentityDemo.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using IdentityDemo.Models;
 
 namespace IdentityDemo.Data
 {
@@ -13,14 +9,9 @@ namespace IdentityDemo.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-        }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            builder.Entity<Product>().ToTable("Products");
-        }
+        }   
 
-        public DbSet<IdentityDemo.Models.Product> Product { get; set; }
+        public DbSet<Product> Product { get; set; }
     }
 }
