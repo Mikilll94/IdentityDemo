@@ -11,11 +11,6 @@ namespace IdentityDemo.Data
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-        }
-
         public DbSet<Product> Product { get; set; }
     }
 }
