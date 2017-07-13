@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,7 +16,11 @@ namespace IdentityDemo.Models
         [Required]
         public string Name { get; set; }
 
-        public string ImageName { get; set; }
+        [NotMapped]
+        [Required]
+        public IFormFile Image { get; set; }
+
+        public string ImagePath { get; set; }
 
         [Required]
         [DataType(DataType.Currency)]

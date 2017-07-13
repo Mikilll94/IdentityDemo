@@ -68,29 +68,22 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductViewModel productViewModel)
+        public async Task<IActionResult> Create(Product product)
         {
             if (!ModelState.IsValid)
             {
-                return View(productViewModel);
+                return View(product);
             }
-
-            IFormFile imageFile = productViewModel.Image;
-            var product = new Product()
-            {
-                Name = productViewModel.Name,
-                ImageName = imageFile.FileName,
-                Price = productViewModel.Price,
-                Description = productViewModel.Description,
-                SellerID = _userManager.GetUserId(User)
-            };
 
             string filePath = Path.Combine(_hostingEnvironment.WebRootPath, 
-                "images", productViewModel.Image.FileName);
+                "images", product.Image.FileName);
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                await imageFile.CopyToAsync(stream);
+                await product.Image.CopyToAsync(stream);
             }
+
+            product.ImagePath = product.Image.FileName;
+            product.SellerID = _userManager.GetUserId(User);
 
             _context.Add(product);
             await _context.SaveChangesAsync();
@@ -99,7 +92,6 @@ namespace IdentityDemo.Controllers
 
         }
 
-        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -114,21 +106,13 @@ namespace IdentityDemo.Controllers
             }
 
             var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                                User, product.SellerID, ProductOperations.Update);
-
+                User, product.SellerID, ProductOperations.Update);
             if (!isAuthorized)
             {
                 return new ChallengeResult();
             }
 
-            var productViewModel = new ProductViewModel()
-            {
-                Name = product.Name,
-                Price = product.Price,
-                Description = product.Description
-            };
-
-            return View(productViewModel);
+            return View(product);
         }
 
         // POST: Products/Edit/5
@@ -136,42 +120,37 @@ namespace IdentityDemo.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ProductViewModel productViewModel)
+        public async Task<IActionResult> Edit(int id, Product product)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var product = _context.Product.SingleOrDefault(p => p.ProductID == id);
-                    if (product == null)
+                    var productInDb = _context.Product.AsNoTracking().
+                        SingleOrDefault(p => p.ProductID == id);
+                    if (productInDb == null)
                     {
                         return NotFound();
                     }
 
                     var isAuthorized = await _authorizationService.AuthorizeAsync(
-                                User, product.SellerID, ProductOperations.Update);
+                                User, productInDb.SellerID, ProductOperations.Update);
                     if (!isAuthorized)
                     {
                         return new ChallengeResult();
                     }
 
                     string filePath = Path.Combine(_hostingEnvironment.WebRootPath,
-                        "images", productViewModel.Image.FileName);
-
+                        "images", product.Image.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        await productViewModel.Image.CopyToAsync(stream);
+                        await product.Image.CopyToAsync(stream);
                     }
-
-                    product.Name = productViewModel.Name;
-                    product.ImageName = productViewModel.Image.FileName;
-                    product.Price = productViewModel.Price;
-                    product.Description = productViewModel.Description;
+                    product.ImagePath = product.Image.FileName;
                     product.SellerID = _userManager.GetUserId(User);
 
                     _context.Update(product);
-
-                    await _context.SaveChangesAsync();
+                    _context.SaveChanges();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -179,7 +158,7 @@ namespace IdentityDemo.Controllers
                 }
                 return RedirectToAction("Index");
             }
-            return View(productViewModel);
+            return View(product);
         }
 
         // GET: Products/Delete/5

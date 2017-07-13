@@ -1,4 +1,4 @@
-@model IEnumerable<IdentityDemo.Models.Product>
+@model IEnumerable<Product>
 @using IdentityDemo.Authorization;
 
 @{
@@ -19,7 +19,7 @@
                     @Html.DisplayNameFor(model => model.Name)
                 </th>
                 <th>
-                    @Html.DisplayNameFor(model => model.ImageName)
+                    @Html.DisplayNameFor(model => model.Image)
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Price)
@@ -40,7 +40,7 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <img src="@Url.Content("~/images/" + item.ImageName)" class="productImage"/>
+                <img src="@Url.Content("~/images/" + item.ImagePath)" class="productImage"/>
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Price)

@@ -1,4 +1,4 @@
-@model IdentityDemo.Models.ProductsViewModels.ProductViewModel
+@model Product
 
 @{
     ViewData["Title"] = "Create";
@@ -23,7 +23,7 @@
         <div class="form-group">
             <label asp-for="Image" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <input type="file" name="Image" asp-for="Image" class="form-control" />
+                <input type="file" asp-for="Image" class="form-control" />
                 <span asp-validation-for="Image" class="text-danger"></span>
             </div>
         </div>
