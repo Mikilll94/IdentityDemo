@@ -201,6 +201,12 @@ namespace IdentityDemo.Controllers
             }
 
             _context.Product.Remove(product);
+
+            string filePath = Path.Combine(_hostingEnvironment.WebRootPath, "images",
+                product.ImagePath);
+            FileInfo f = new FileInfo(filePath);
+            f.Delete();
+
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }

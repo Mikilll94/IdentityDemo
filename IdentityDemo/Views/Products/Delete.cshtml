@@ -21,10 +21,10 @@
             @Html.DisplayFor(model => model.Name)
         </dd>
         <dt>
-            @Html.DisplayNameFor(model => model.ImageName)
+            @Html.DisplayNameFor(model => model.Image)
         </dt>
         <dd>
-            <img src="@Url.Content("~/images/" + Model.ImageName)" class="productImage" />
+            <img src="@Url.Content("~/images/" + Model.ImagePath)" class="productImage" />
         </dd>
         <dt>
             @Html.DisplayNameFor(model => model.Price)

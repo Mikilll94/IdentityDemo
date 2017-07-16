@@ -14,20 +14,25 @@ namespace IdentityDemo.Models
         public int ProductID { get; set; }
 
         [Required]
+        [Display(Name = "Nazwa")]
         public string Name { get; set; }
 
         [NotMapped]
         [Required]
+        [Display(Name = "Zdjęcie")]
         public IFormFile Image { get; set; }
 
         public string ImagePath { get; set; }
 
         [Required]
         [DataType(DataType.Currency)]
+        [Display(Name = "Cena")]
         public decimal Price { get; set; }
 
+        [Display(Name = "Opis")]
         public string Description { get; set; }
 
+        [Display(Name = "Sprzedający")]
         public string SellerID { get; set; }
     }
 }

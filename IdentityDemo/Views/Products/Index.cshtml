@@ -1,5 +1,6 @@
 @model IEnumerable<Product>
 @using IdentityDemo.Authorization;
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     ViewData["Title"] = "Index";
@@ -49,7 +50,11 @@
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.SellerID)
+                @{ 
+                    var SellerFullName = 
+                        UserManager.FindByIdAsync(item.SellerID).Result.FullName;
+                }
+                @Html.DisplayFor(modelItem => SellerFullName)
             </td>
             <td>
                 @if (await AuthorizationService.AuthorizeAsync(User,
@@ -57,7 +62,7 @@
                 {
                     <a asp-action="Edit" asp-route-id="@item.ProductID">Edit</a><text> | </text>
                 }
-                <a asp-action="Details" asp-route-id="@item.ProductID">Details</a> |
+                <a asp-action="Details" asp-route-id="@item.ProductID">Details</a>
                 @if (await AuthorizationService.AuthorizeAsync(User,
                                              item.SellerID, ProductOperations.Delete))
                 {
