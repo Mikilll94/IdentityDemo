@@ -26,6 +26,7 @@ namespace IdentityDemo.Models
 
         [Required]
         [DataType(DataType.Currency)]
+        [RegularExpression(@"^-?\d{1,16}?(?:\,\d{0,2})?$", ErrorMessage = "Nieprawidłowa cena")]
         [Display(Name = "Cena")]
         public decimal Price { get; set; }
 
