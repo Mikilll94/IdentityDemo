@@ -70,6 +70,11 @@ namespace IdentityDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
         {
+            if (product.Image == null)
+            {
+                ModelState.AddModelError("Image", "Zdjêcie jest wymagane");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(product);
@@ -150,13 +155,21 @@ namespace IdentityDemo.Controllers
                         return new ChallengeResult();
                     }
 
-                    string filePath = Path.Combine(_hostingEnvironment.WebRootPath,
-                        "images", product.Image.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    if (product.Image != null)
                     {
-                        await product.Image.CopyToAsync(stream);
+                        string filePath = Path.Combine(_hostingEnvironment.WebRootPath,
+                            "images", product.Image.FileName);
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await product.Image.CopyToAsync(stream);
+                        }
+                        product.ImagePath = product.Image.FileName;
                     }
-                    product.ImagePath = product.Image.FileName;
+                    else
+                    {
+                        product.ImagePath = productInDb.ImagePath;
+                    }
+
                     product.SellerID = _userManager.GetUserId(User);
 
                     _context.Update(product);

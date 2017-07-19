@@ -4,7 +4,31 @@
     ViewData["Title"] = "Create";
 }
 
-<link rel="stylesheet" href="~/css/" />
+<link href="~/css/products.css" rel="stylesheet" />
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('input[type = "file"]').change(function () {
+            var data = new FormData();
+            var files = $(this).get(0).files;
+            if (files.length > 0) {
+                data.append("UploadedImage", files[0]);
+            }
+            var ajaxRequest = $.ajax({
+                type: "POST",
+                url: "/Products/UploadFile",
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (data) {
+                    $('#image').show();
+                    $('#image').prop("src", data.filePath);
+                }
+            });
+        });
+    });
+</script>
 
 <h2>Create</h2>
 
@@ -23,6 +47,7 @@
         <div class="form-group">
             <label asp-for="Image" class="col-md-2 control-label"></label>
             <div class="col-md-10">
+                <img id="image" class="productImage" style="display:none"/>
                 <input type="file" asp-for="Image" class="form-control" />
                 <span asp-validation-for="Image" class="text-danger"></span>
             </div>

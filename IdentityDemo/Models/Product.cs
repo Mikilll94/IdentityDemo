@@ -18,7 +18,6 @@ namespace IdentityDemo.Models
         public string Name { get; set; }
 
         [NotMapped]
-        [Required]
         [Display(Name = "Zdjęcie")]
         public IFormFile Image { get; set; }
 
