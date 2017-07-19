@@ -92,6 +92,19 @@ namespace IdentityDemo.Controllers
 
         }
 
+        [HttpPost]
+        public object UploadFile()
+        {
+            var file = Request.Form.Files[0];
+            var fileSavePath = Path.Combine(_hostingEnvironment.WebRootPath,
+                "images", "temp", file.FileName);
+            using (var stream = new FileStream(fileSavePath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+            }
+            return new { filePath = Url.Content("~/images/temp/" + file.FileName) };
+        }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -115,9 +128,6 @@ namespace IdentityDemo.Controllers
             return View(product);
         }
 
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Product product)
